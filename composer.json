@@ -1,5 +1,5 @@
 {
-  "name": "gameplayjdk/php-cache",
+  "name": "gameplayjdk/php-file-cache",
   "description": "Low-level, file based cache using var_export() and some magic. Optionally PSR-16 compliant.",
   "type": "library",
   "minimum-stability": "stable",
