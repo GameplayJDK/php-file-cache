@@ -115,6 +115,8 @@ echo PHP_EOL;
 
 // The PSR-16 compliant adapter can also be used. It takes a cache instance as constructor argument.
 $psrCache = new Psr16Cache($cache);
+// Set the cache expiry time to one minute.
+$psrCache->setCacheExpiryTime(strtotime('+1 Minute', 0));
 
 // Now the object can be used using the standard interface methods.
 echo PHP_EOL;
