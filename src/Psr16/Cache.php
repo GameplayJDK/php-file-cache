@@ -31,10 +31,18 @@ use Psr\SimpleCache\CacheInterface;
  */
 final class Cache implements CacheInterface
 {
+    const SANITIZE_PATTERN = '/[^a-zA-Z\-]/';
+    const SANITIZE_REPLACEMENT = '-';
+
     /**
      * @var PhpCache
      */
     private $cache;
+
+    /**
+     * @var int
+     */
+    private $cacheExpiryTime;
 
     /**
      * Cache constructor.
@@ -43,6 +51,7 @@ final class Cache implements CacheInterface
     public function __construct(PhpCache $cache)
     {
         $this->cache = $cache;
+        $this->cacheExpiryTime = strtotime('+1 Day', 0);
     }
 
     /**
@@ -54,7 +63,9 @@ final class Cache implements CacheInterface
         $value = null;
 
         try {
-            $value = $this->cache->get($key);
+            if (!$this->expired($key)) {
+                $value = $this->cache->get($key);
+            }
         } catch (CacheException $exception) {
             throw new InvalidArgumentException();
         }
@@ -192,17 +203,60 @@ final class Cache implements CacheInterface
     }
 
     /**
+     * Sanitize the given key. Replace anything matching the `SANITIZE_PATTERN` with the `SANITIZE_REPLACEMENT`.
+     *
      * @param string|null $key
      * @return string|null
      * @throws InvalidArgumentException
      */
     private function sanitize($key): ?string
     {
-        // TODO: The pattern and replacement should be a constant.
-        if (empty($key) || !is_string($key) || (null === ($clean = preg_replace('/[^a-zA-Z\-]/', '-', $key)))) {
+        if (empty($key) || !is_string($key) || (null === ($clean = preg_replace(static::SANITIZE_PATTERN, static::SANITIZE_REPLACEMENT, $key)))) {
             throw new InvalidArgumentException("Key '$key' is not a legal value!");
         }
 
         return $clean;
+    }
+
+    /**
+     * Check if the entry for the given key is expired.
+     *
+     * @param string|null $key
+     * @return bool
+     * @throws InvalidArgumentException
+     */
+    public function expired($key)
+    {
+        $key = $this->sanitize($key);
+        $expired = false;
+
+        try {
+            $cacheExpiryTime = $this->cacheExpiryTime > 0
+                ? time() - $this->cacheExpiryTime
+                : 0;
+
+            $expired = $this->cache->exp($key, $cacheExpiryTime);
+        } catch (CacheException $exception) {
+        }
+
+        return $expired;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCacheExpiryTime(): int
+    {
+        return $this->cacheExpiryTime;
+    }
+
+    /**
+     * @param int $cacheExpiryTime
+     * @return Cache
+     */
+    public function setCacheExpiryTime(int $cacheExpiryTime): Cache
+    {
+        $this->cacheExpiryTime = $cacheExpiryTime;
+        return $this;
     }
 }
