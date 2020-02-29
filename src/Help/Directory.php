@@ -19,17 +19,17 @@
 
 namespace Cache\Help;
 
+use Closure;
+
 /**
  * Class Directory
+ *
+ * TODO: Move static helper classes to package gameplayjdk/static-help.
  *
  * @package Cache\Help
  */
 final class Directory
 {
-    private function __construct()
-    {
-    }
-
     /**
      * List content of a directory naively.
      *
@@ -57,7 +57,7 @@ final class Directory
      *
      * @param string $path
      * @param string $pattern
-     * @return array
+     * @return array|string[]
      */
     public static function listPattern(string $path, string $pattern = ''): array
     {
@@ -67,8 +67,26 @@ final class Directory
             return $content;
         }
 
-        return array_filter($content, function (string $entry) use ($pattern) {
-            return preg_match($pattern, $entry);
+        return array_filter($content, function (string $entry) use ($pattern): bool {
+            return (bool)preg_match($pattern, $entry);
         });
+    }
+
+    /**
+     * List content of a directory naively. Filter entries returning a non-falsy value from the callback.
+     *
+     * @param string $path
+     * @param Closure|null $callback
+     * @return array|string[]
+     */
+    public static function listCallback(string $path, ?Closure $callback = null): array
+    {
+        $content = static::list($path);
+
+        if (empty($content) || null === $callback) {
+            return $content;
+        }
+
+        return array_filter($content, $callback);
     }
 }

@@ -1,6 +1,6 @@
 # php-file-cache
 
-Low-level, file based cache using `var_export()` and some magic. Optionally [PSR-16](https://www.php-fig.org/psr/psr-16/) compliant.
+Low-level, file based cache using `brick/varexporter`. Optionally [PSR-16](https://www.php-fig.org/psr/psr-16/) compliant.
 
 ## Installation
 
@@ -21,7 +21,7 @@ use Cache\Psr16\Cache as Psr16Cache;
 $key = 'an_example_key';
 
 // Create cache object.
-$cache = new Cache(__DIR__ .  '/example/cache');
+$cache = new Cache(__DIR__ .  '/cache');
 
 // Set something to the cache.
 $value = 'some string value';
@@ -54,7 +54,7 @@ $present = $cache->has($key);
 echo $present ? 'still present' : 'no more present';
 echo PHP_EOL;
 
-// Caching an object. This requires to implement the static method __set_state($an_array).
+// Caching an object.
 echo PHP_EOL;
 
 /**
@@ -73,6 +73,8 @@ class Something {
     public $var2 = null;
 
     /**
+     * This is optional.
+     * 
      * @param array $an_array
      * @return Something
      */

@@ -22,22 +22,20 @@ namespace Cache\Help;
 /**
  * Class Path
  *
+ * TODO: Move static helper classes to package gameplayjdk/static-help.
+ *
  * @package Cache\Help
  */
 final class Path
 {
-    private function __construct()
-    {
-    }
-
     /**
      * Join an arbitrary amount of path segments. The regex used is \/{2,}.
      *
-     * @param string ...$segment
+     * @param string ...$paths
      * @return string
      */
-    public static function join(string ...$segment): string
+    public static function join(string ...$paths): string
     {
-        return preg_replace('/\/{2,}/', '/', implode('/', $segment));
+        return preg_replace('/\/{2,}/', '/', implode('/', $paths));
     }
 }

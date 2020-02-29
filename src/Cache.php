@@ -19,9 +19,11 @@
 
 namespace Cache;
 
+use Brick\VarExporter\VarExporter;
 use Cache\Exception\CacheException;
 use Cache\Help\Directory;
 use Cache\Help\Path;
+use Exception;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -33,6 +35,7 @@ use Symfony\Component\Filesystem\Filesystem;
 class Cache
 {
     const FILE_EXTENSION = '.php';
+    const FILE_PATTERN = '/^.+\.php$/';
 
     /**
      * @var string
@@ -69,7 +72,6 @@ class Cache
     {
         $path = $this->getPath($key);
 
-        // TODO: file_exists()/exists() check is expensive, just @include is less.
         if ($this->filesystem->exists($path)) {
             @include $path;
 
@@ -82,8 +84,7 @@ class Cache
     }
 
     /**
-     * Set a value for a cache file. The value can be anything. If the value is an object, it has to implement the
-     * {@link https://www.php.net/manual/en/language.oop5.magic.php#object.set-state __set_state()} function.
+     * Set a value for a cache file. The value can be anything.
      *
      * @param string $key
      * @param mixed $value
@@ -93,16 +94,14 @@ class Cache
     {
         $path = $this->getPath($key);
 
-        if (is_object($value) && !method_exists($value, '__set_state')) {
-            throw new CacheException('Unsupported operation: The object does not implement __set_state method.');
+        try {
+            $valueExport = VarExporter::export($value);
+            $valueExport = '<?php $value = ' . $valueExport . ';';
+
+            $this->filesystem->dumpFile($path, $valueExport);
+        } catch (Exception $exception) {
+            throw new CacheException('Unsupported operation: The value could not be exported properly.', 0, $exception);
         }
-
-        $valueExport = var_export($value, true);
-        // Uncomment for HHVM fix.
-        //$valueExport = str_replace('stdClass::__set_state', '(object)', $valueExport);
-        $valueExport = '<?php $value = ' . $valueExport . ';';
-
-        $this->filesystem->dumpFile($path, $valueExport);
     }
 
     /**
@@ -162,8 +161,7 @@ class Cache
      */
     public function clr(): void
     {
-        // TODO: The pattern should be a constant.
-        $list = Directory::listPattern($this->path, '/^.+\.php$/');
+        $list = Directory::listPattern($this->path, static::FILE_PATTERN);
 
         foreach ($list as $entry) {
             $this->filesystem->remove($this->getPath($entry));

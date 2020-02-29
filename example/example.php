@@ -58,7 +58,7 @@ $present = $cache->has($key);
 echo $present ? 'still present' : 'no more present';
 echo PHP_EOL;
 
-// Caching an object. This requires to implement the static method __set_state($an_array).
+// Caching an object.
 echo PHP_EOL;
 
 /**
@@ -77,6 +77,8 @@ class Something {
     public $var2 = null;
 
     /**
+     * This is optional.
+     *
      * @param array $an_array
      * @return Something
      */
