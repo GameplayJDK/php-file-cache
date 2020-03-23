@@ -31,7 +31,7 @@ use Psr\SimpleCache\CacheInterface;
  */
 final class Cache implements CacheInterface
 {
-    const SANITIZE_PATTERN = '/[^a-zA-Z\-]/';
+    const SANITIZE_PATTERN = '/[^a-zA-Z0-9\-]/';
     const SANITIZE_REPLACEMENT = '-';
 
     /**
