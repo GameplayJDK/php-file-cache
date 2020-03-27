@@ -21,9 +21,9 @@ namespace Cache;
 
 use Brick\VarExporter\VarExporter;
 use Cache\Exception\CacheException;
-use Cache\Help\Directory;
-use Cache\Help\Path;
 use Exception;
+use Help\Directory;
+use Help\Path;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 
