@@ -231,9 +231,7 @@ final class Cache implements CacheInterface
         $expired = false;
 
         try {
-            $cacheExpiryTime = $this->cacheExpiryTime > 0
-                ? time() - $this->cacheExpiryTime
-                : 0;
+            $cacheExpiryTime = time() - $this->cacheExpiryTime;
 
             $expired = $this->cache->exp($key, $cacheExpiryTime);
         } catch (CacheException $exception) {
